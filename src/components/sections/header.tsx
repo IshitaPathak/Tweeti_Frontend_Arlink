@@ -46,8 +46,11 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
+    // @ts-ignore
     if (session?.githubUsername) {
+          // @ts-ignore
       setGithubUsername(session.githubUsername);
+          // @ts-ignore
       console.log("✅ GitHub username from session:", session.githubUsername);
     }
   }, [session]);
