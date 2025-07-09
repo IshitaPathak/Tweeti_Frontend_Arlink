@@ -25,6 +25,8 @@ export default function Header() {
     access_secret: "",
   });
   const [githubUsername, setGithubUsername] = useState("");
+  const [isGithubLoading, setIsGithubLoading] = useState(false);
+  const [isXLoading, setIsXLoading] = useState(false);
 
   const isXConnected = Boolean(xCredentials.access_token && xCredentials.access_secret);
 
@@ -64,9 +66,16 @@ export default function Header() {
   }, [isXConnected]);
 
   const handleSignIn = async () => {
-    await signIn("github", {
-      callbackUrl: `${window.location.origin}?modal=x`,
-    });
+    try {
+      setIsGithubLoading(true);
+      await signIn("github", {
+        callbackUrl: `${window.location.origin}?modal=x`,
+      });
+    } catch (error) {
+      console.error("GitHub sign in error:", error);
+    } finally {
+      setIsGithubLoading(false);
+    }
   };
 
   const handleConnectX = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -76,8 +85,9 @@ export default function Header() {
 
   const getXCredentials = async () => {
     try {
+      setIsXLoading(true);
       const popup = window.open(
-        `https://xauth-s7vs.onrender.com/auth/twitter`,
+        `https://xauth.onrender.com/auth/twitter`,
         "_blank",
         "width=500,height=600"
       );
@@ -120,6 +130,8 @@ export default function Header() {
             console.error("❌ Failed to save credentials:", err);
             setStatusType("error");
             setStatusMessage("❌ Token received but failed to save");
+          } finally {
+            setIsXLoading(false);
           }
 
           window.removeEventListener("message", messageListener);
@@ -132,6 +144,7 @@ export default function Header() {
       console.error("X OAuth error:", err);
       setStatusType("error");
       setStatusMessage("❌ Failed to connect to X. Try again.");
+      setIsXLoading(false);
     }
   };
 
@@ -242,18 +255,32 @@ export default function Header() {
                 variant="ghost"
                 onClick={handleSignIn}
                 className="w-full flex items-center justify-center gap-2"
+                disabled={isGithubLoading}
               >
-                Connect to GitHub
+                {isGithubLoading ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-opacity-20 border-t-primary"/>
+                    Connecting...
+                  </>
+                ) : (
+                  "Connect to GitHub"
+                )}
               </Button>
 
               <Button
-                className="w-full text-white-900 bg-blue-600 hover:bg-blue-700"
+                className="w-full text-white-900 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400"
                 onClick={getXCredentials}
+                disabled={isXLoading || !githubUsername}
               >
                 {isXConnected ? (
                   <>
                     <Check className="h-4 w-4 text-white" />
                     Connected to X
+                  </>
+                ) : isXLoading ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-opacity-20 border-t-white"/>
+                    Connecting...
                   </>
                 ) : (
                   "Connect to X"
