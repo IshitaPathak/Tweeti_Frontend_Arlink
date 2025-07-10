@@ -170,7 +170,7 @@ function HeroImage() {
     >
       <HeroVideoDialog
         animationStyle="from-center"
-        videoSrc="https://www.youtube.com/embed/-N6UdZifWEY?si=VTcdMsQg2qwSw0KT"
+        videoSrc="https://www.youtube.com/embed/1kyfDrPnbgE"
         thumbnailSrc="/600x200.jpeg"
         thumbnailAlt="Hero Video"
         className="border rounded-lg shadow-lg max-w-screen-lg mt-16"
