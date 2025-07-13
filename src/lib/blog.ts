@@ -1,14 +1,10 @@
-// import { siteConfig } from "@/lib/config";
-import { siteConfig } from "../lib/config"
-
-import fs from "fs";
-import path from "path";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkGfm from "remark-gfm";
+import remarkRehype from "remark-rehype";
 import rehypePrettyCode from "rehype-pretty-code";
 import rehypeStringify from "rehype-stringify";
-import remarkGfm from "remark-gfm";
-import remarkParse from "remark-parse";
-import remarkRehype from "remark-rehype";
-import { unified } from "unified";
+import { siteConfig } from "../lib/config";
 
 export type Post = {
   title: string;
@@ -17,29 +13,53 @@ export type Post = {
   author: string;
   slug: string;
   image?: string;
+  content?: string;
 };
 
-function parseFrontmatter(fileContent: string) {
-  let frontmatterRegex = /---\s*([\s\S]*?)\s*---/;
-  let match = frontmatterRegex.exec(fileContent);
-  let frontMatterBlock = match![1];
-  let content = fileContent.replace(frontmatterRegex, "").trim();
-  let frontMatterLines = frontMatterBlock.trim().split("\n");
-  let metadata: Partial<Post> = {};
+// Static blog posts data
+const blogPosts: Post[] = [
+  {
+    title: "Introducing Tweeti",
+    publishedAt: "2024-01-15",
+    summary: "A decentralized Twitter alternative that puts you in control",
+    author: "Tweeti Team",
+    slug: "introducing-tweeti",
+    content: `
+# Introducing Tweeti
 
-  frontMatterLines.forEach((line) => {
-    let [key, ...valueArr] = line.split(": ");
-    let value = valueArr.join(": ").trim();
-    value = value.replace(/^['"](.*)['"]$/, "$1"); // Remove quotes
-    metadata[key.trim() as keyof Post] = value;
-  });
+Tweeti is a revolutionary decentralized social media platform built on Arweave, designed to give users complete control over their data while providing a familiar and intuitive experience.
 
-  return { data: metadata as Post, content };
-}
+## Key Features
 
-function getMDXFiles(dir: string) {
-  return fs.readdirSync(dir).filter((file) => path.extname(file) === ".mdx");
-}
+- Permanent Storage on Arweave
+- User-owned Data
+- Decentralized Architecture
+- Twitter-like Experience
+- Privacy-focused Design
+
+Join us in reshaping the future of social media!
+    `,
+  },
+  {
+    title: "How We Manage Data",
+    publishedAt: "2024-01-16",
+    summary: "Learn about our approach to data storage and management using Arweave",
+    author: "Tweeti Team",
+    slug: "how-we-manage-data",
+    content: `
+# How We Manage Data on Tweeti
+
+At Tweeti, we leverage Arweave's permanent storage to ensure your data remains accessible and under your control forever.
+
+## Our Architecture
+
+- Permanent Storage: All data is stored on Arweave
+- Data Ownership: Users retain complete control
+- Accessibility: Data is always available
+- Security: End-to-end encryption
+    `,
+  },
+];
 
 export async function markdownToHTML(markdown: string) {
   const p = await unified()
@@ -47,7 +67,6 @@ export async function markdownToHTML(markdown: string) {
     .use(remarkGfm)
     .use(remarkRehype)
     .use(rehypePrettyCode, {
-      // https://rehype-pretty.pages.dev/#usage
       theme: {
         light: "min-light",
         dark: "min-dark",
@@ -61,38 +80,27 @@ export async function markdownToHTML(markdown: string) {
 }
 
 export async function getPost(slug: string) {
-  const filePath = path.join(process.cwd(), "content", `${slug}.mdx`);
-  const source = fs.readFileSync(filePath, "utf-8");
-  const { content: rawContent, data: metadata } = parseFrontmatter(source);
-  const content = await markdownToHTML(rawContent);
-  const defaultImage = `${siteConfig.url}/og?title=${encodeURIComponent(
-    metadata.title
-  )}`;
+  const post = blogPosts.find((post) => post.slug === slug);
+  if (!post) {
+    throw new Error(`Post with slug "${slug}" not found`);
+  }
+
+  const content = post.content ? await markdownToHTML(post.content) : "";
+  const defaultImage = `${siteConfig.url}/og?title=${encodeURIComponent(post.title)}`;
+
   return {
     source: content,
     metadata: {
-      ...metadata,
-      image: metadata.image || defaultImage,
+      ...post,
+      image: post.image || defaultImage,
     },
     slug,
   };
 }
 
-async function getAllPosts(dir: string) {
-  const mdxFiles = getMDXFiles(dir);
-  return Promise.all(
-    mdxFiles.map(async (file) => {
-      const slug = path.basename(file, path.extname(file));
-      const { metadata, source } = await getPost(slug);
-      return {
-        ...metadata,
-        slug,
-        source,
-      };
-    })
-  );
-}
-
 export async function getBlogPosts() {
-  return getAllPosts(path.join(process.cwd(), "content"));
+  return blogPosts.map((post) => ({
+    ...post,
+    image: post.image || `${siteConfig.url}/og?title=${encodeURIComponent(post.title)}`,
+  }));
 }
