@@ -1,21 +1,20 @@
-"use client";
+'use client';
 
-import { useSession, signIn, getSession } from "next-auth/react";
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { Check } from "lucide-react";
-
-import Drawer from "@/components/drawer";
-import Menu from "@/components/menu";
-import { buttonVariants } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Check } from 'lucide-react';
+import useAuth from '@/lib/hooks/useAuth';
+import Drawer from '@/components/drawer';
+import Menu from '@/components/menu';
+import { buttonVariants } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export default function Header() {
-  const { data: session } = useSession();
+  const { session, signIn } = useAuth();
   const [addBorder, setAddBorder] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [statusType, setStatusType] = useState<"success" | "error" | null>(null);
@@ -37,40 +36,15 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    const url = new URL(window.location.href);
-    const modalParam = url.searchParams.get("modal");
-
-    if (modalParam === "x") {
-      setShowXModal(true);
-      url.searchParams.delete("modal");
-      window.history.replaceState({}, "", url.toString());
-    }
-  }, []);
-
-  useEffect(() => {
-    // @ts-ignore
     if (session?.githubUsername) {
-          // @ts-ignore
       setGithubUsername(session.githubUsername);
-          // @ts-ignore
-      console.log("✅ GitHub username from session:", session.githubUsername);
     }
   }, [session]);
-
-  useEffect(() => {
-    if (isXConnected) {
-      setShowXModal(false);
-      setStatusType("success");
-      setStatusMessage("🎉 Both GitHub and X are connected!");
-    }
-  }, [isXConnected]);
 
   const handleSignIn = async () => {
     try {
       setIsGithubLoading(true);
-      await signIn("github", {
-        callbackUrl: `${window.location.origin}?modal=x`,
-      });
+      await signIn();
     } catch (error) {
       console.error("GitHub sign in error:", error);
     } finally {
@@ -87,7 +61,7 @@ export default function Header() {
     try {
       setIsXLoading(true);
       const popup = window.open(
-        `https://xauth.onrender.com/auth/twitter`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/twitter`,
         "_blank",
         "width=500,height=600"
       );
@@ -106,15 +80,13 @@ export default function Header() {
             access_secret: event.data.access_secret,
           };
 
-          console.log("🐛 Sending X credentials:", tokenData);
-
           setXCredentials({
             access_token: tokenData.access_token,
             access_secret: tokenData.access_secret,
           });
 
           try {
-            const res = await fetch("/api/save-x-credentials", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/save-x-credentials`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",

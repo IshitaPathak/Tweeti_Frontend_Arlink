@@ -1,8 +1,4 @@
-'use server';
-
-import { neon } from '@neondatabase/serverless';
-
-const sql = neon(process.env.DATABASE_URL!);
+'use client';
 
 export async function saveXCredentials({
   github_username,
@@ -13,20 +9,22 @@ export async function saveXCredentials({
   access_token: string;
   access_secret: string;
 }) {
-  await sql`
-    INSERT INTO x_credentials (
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/save-x-credentials`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
       github_username,
       access_token,
       access_secret,
-      created_at
-    )
-    VALUES (
-      ${github_username},
-      ${access_token},
-      ${access_secret},
-      NOW()
-    );
-  `;
+    }),
+  });
+
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error('Failed to save credentials');
+  }
 
   return { success: true };
 }

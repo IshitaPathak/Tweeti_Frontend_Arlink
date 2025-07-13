@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import useAuth from "@/lib/hooks/useAuth";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
@@ -27,7 +27,7 @@ export default function ProjectForm({
   });
   const [advanced, setAdvanced] = useState(false);
 
-  const { data: session } = useSession();
+  const { session, signIn } = useAuth();
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -40,7 +40,7 @@ export default function ProjectForm({
     e.preventDefault();
 
     if (!session) {
-      signIn("github");
+      signIn();
     } else {
       const prepared = {
         ...formData,
@@ -69,6 +69,8 @@ export default function ProjectForm({
     }
   }
 
+  const { signOut } = useAuth();
+  
   return (
     <form
       onSubmit={handleConnectClick}

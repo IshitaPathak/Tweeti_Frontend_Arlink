@@ -6,6 +6,10 @@ interface GitHubProfile {
   [key: string]: any;
 }
 
+export async function generateStaticParams() {
+  return [];
+}
+
 const handler = NextAuth({
   providers: [
     GitHubProvider({
