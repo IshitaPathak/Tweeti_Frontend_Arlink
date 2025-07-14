@@ -36,7 +36,11 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
+      const params = new URLSearchParams(window.location.search);
+      const username = params.get('username');
+      console.log('GitHub Username:', username);
     if (session?.githubUsername) {
+      console.log(session.githubUsername);
       setGithubUsername(session.githubUsername);
     }
   }, [session]);

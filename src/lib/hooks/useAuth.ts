@@ -15,11 +15,13 @@ export default function useAuth() {
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/github/callback?code=${code}`)
         .then(res => res.json())
         .then(data => {
+          console.log(data);
           if (data.githubUsername) {
             setSession({
               user: { email: data.githubUsername },
               githubUsername: data.githubUsername
             });
+            localStorage.setItem('githubUsername', data.githubUsername);
             // Clear the URL parameters
             window.history.replaceState({}, document.title, window.location.pathname);
           }
