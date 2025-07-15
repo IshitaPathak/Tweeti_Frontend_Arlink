@@ -1,23 +1,32 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Check } from 'lucide-react';
-import useAuth from '@/lib/hooks/useAuth';
-import Drawer from '@/components/drawer';
-import Menu from '@/components/menu';
-import { buttonVariants } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { cn } from '@/lib/utils';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import axios from "axios";
+import Image from "next/image";
+import { Check } from "lucide-react";
+import useAuth from "@/lib/hooks/useAuth";
+import Drawer from "@/components/drawer";
+import Menu from "@/components/menu";
+import { buttonVariants } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default function Header() {
   const { session, signIn } = useAuth();
   const [addBorder, setAddBorder] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
-  const [statusType, setStatusType] = useState<"success" | "error" | null>(null);
+  const [statusType, setStatusType] = useState<"success" | "error" | null>(
+    null
+  );
   const [showXModal, setShowXModal] = useState(false);
   const [xCredentials, setXCredentials] = useState({
     access_token: "",
@@ -27,10 +36,21 @@ export default function Header() {
   const [isGithubLoading, setIsGithubLoading] = useState(false);
   const [isXLoading, setIsXLoading] = useState(false);
 
-  const isXConnected = Boolean(xCredentials.access_token && xCredentials.access_secret);
+  const isXConnected = Boolean(
+    xCredentials.access_token && xCredentials.access_secret
+  );
 
   useEffect(() => {
     const handleScroll = () => setAddBorder(window.scrollY > 20);
+
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get("username");
+
+    console.log("GitHub Username:", username);
+    if (username) {
+      setGithubUsername(username);
+    }
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -43,8 +63,11 @@ export default function Header() {
 
   const handleSignIn = async () => {
     try {
+      console.log("entered in the login with github");
       setIsGithubLoading(true);
       await signIn();
+      // const data = await axios.get("http://localhost:3001/api/auth/github")
+      // console.log(data)
     } catch (error) {
       console.error("GitHub sign in error:", error);
     } finally {
@@ -61,7 +84,7 @@ export default function Header() {
     try {
       setIsXLoading(true);
       const popup = window.open(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/twitter`,
+        `https://xauth-s7vs.onrender.com/auth/twitter`,
         "_blank",
         "width=500,height=600"
       );
@@ -73,7 +96,11 @@ export default function Header() {
       }
 
       const messageListener = async (event: MessageEvent) => {
-        if (event.data?.access_token && event.data?.access_secret && githubUsername) {
+        if (
+          event.data?.access_token &&
+          event.data?.access_secret &&
+          githubUsername
+        ) {
           const tokenData = {
             github_username: githubUsername,
             access_token: event.data.access_token,
@@ -86,13 +113,16 @@ export default function Header() {
           });
 
           try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/save-x-credentials`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(tokenData),
-            });
+            const res = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/save-x-credentials`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(tokenData),
+              }
+            );
 
             if (!res.ok) throw new Error("Failed to save credentials");
 
@@ -131,8 +161,17 @@ export default function Header() {
       >
         <div className="container flex h-16 items-center justify-between">
           <div className="mr-4 hidden md:flex">
-            <Link href="/" title="brand-logo" className="relative mr-6 flex items-center">
-              <Image src="/Tweeti_Logo.png" alt="Tweeti Logo" width={100} height={100} />
+            <Link
+              href="/"
+              title="brand-logo"
+              className="relative mr-6 flex items-center"
+            >
+              <Image
+                src="/Tweeti_Logo.png"
+                alt="Tweeti Logo"
+                width={100}
+                height={100}
+              />
             </Link>
           </div>
 
@@ -144,7 +183,7 @@ export default function Header() {
 
               <div className="gap-2 flex items-center">
                 {isXConnected ? (
-                  <div className="inline-flex items-center text-green-700 font-medium border border-green-200 px-3 py-2 rounded-md text-sm bg-green-50">
+                  <div className="inline-flex items-center text-green-700 font-medium border border-green-200 px-3 py-2 rounded-md text-sm bg-green-300">
                     ✅ Connected
                   </div>
                 ) : (
@@ -193,18 +232,21 @@ export default function Header() {
             </button>
 
             <CardHeader>
-              <CardTitle className="text-2xl font-heading tracking-heading">
+              <CardTitle className="text-2xl font-heading ">
                 🔗 Connect GitHub & X
               </CardTitle>
               <p className="text-sm font-body tracking-body text-muted-foreground mt-1">
-                Securely link your X and GitHub developer credentials to generate automated tweets powered by Tweeti.
+                Securely link your X and GitHub developer credentials to
+                generate automated tweets powered by Tweeti.
               </p>
             </CardHeader>
 
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between text-sm font-body tracking-body text-muted-foreground">
                 <span>Step 2 of 2</span>
-                <span>{isXConnected ? "You're all set!" : "Now connect to X"}</span>
+                <span>
+                  {isXConnected ? "You're all set!" : "Now connect to X"}
+                </span>
               </div>
 
               <Progress value={isXConnected ? 100 : 50} className="h-2" />
@@ -224,14 +266,20 @@ export default function Header() {
 
             <CardFooter className="flex justify-between gap-3">
               <Button
-                variant="ghost"
+                variant={githubUsername ? undefined : "ghost"}
                 onClick={handleSignIn}
-                className="w-full flex items-center justify-center gap-2"
-                disabled={isGithubLoading}
+                className={`w-full flex items-center justify-center gap-2 transition-colors ${
+                  githubUsername
+                    ? "bg-green-600 hover:bg-green-600 text-white cursor-default"
+                    : ""
+                }`}
+                disabled={isGithubLoading || !!githubUsername}
               >
-                {isGithubLoading ? (
+                {githubUsername ? (
+                  "Connected"
+                ) : isGithubLoading ? (
                   <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-opacity-20 border-t-primary"/>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-opacity-20 border-t-primary" />
                     Connecting...
                   </>
                 ) : (
@@ -251,7 +299,7 @@ export default function Header() {
                   </>
                 ) : isXLoading ? (
                   <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-opacity-20 border-t-white"/>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-opacity-20 border-t-white" />
                     Connecting...
                   </>
                 ) : (
