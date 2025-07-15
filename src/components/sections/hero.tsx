@@ -111,7 +111,7 @@ export function HeroCTA() {
               Requires X Credentials
             </div>
           </div>
-          <h3 className="text-xl font-heading tracking-heading text-foreground mb-2">GitHub Commit to Tweet</h3>
+          <h3 className="text-xl font-heading tracking-body text-foreground mb-2">GitHub Commit to Tweet</h3>
           <p className="text-muted-foreground font-body tracking-body mb-4">Automatically tweet updates about your product</p>
           <Link
             href="https://github.com/apps/tweetiii"

@@ -148,6 +148,10 @@ export default function Header() {
 
             setStatusType("success");
             setStatusMessage("✅ Token received and saved successfully");
+            setTimeout(() => {
+              setStatusType(null);
+              setStatusMessage("");
+            }, 3000); // 3 seconds
           } catch (err) {
             console.error("❌ Failed to save credentials:", err);
             setStatusType("error");
@@ -267,13 +271,23 @@ export default function Header() {
 
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between text-sm font-body tracking-body text-muted-foreground">
-                <span>Step 2 of 2</span>
                 <span>
-                  {isXConnected ? "You're all set!" : "Now connect to X"}
+                  {!githubUsername
+                    ? "Step 1 of 2"
+                    : !isXConnected
+                    ? "Step 2 of 2"
+                    : "All steps complete"}
+                </span>
+                <span>
+                  {!githubUsername
+                    ? "First connect to GitHub"
+                    : !isXConnected
+                    ? "Now connect to X"
+                    : "You're all set!"}
                 </span>
               </div>
 
-              <Progress value={isXConnected ? 100 : 50} className="h-2" />
+              <Progress value={!githubUsername ? 0 : !isXConnected ? 50 : 100} className="h-2" />
 
               <div className="pt-2 text-sm font-body tracking-body text-muted-foreground">
                 Need help?{" "}
