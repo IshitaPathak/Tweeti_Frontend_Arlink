@@ -24,7 +24,7 @@ const data = [
     title: "3. Install the tweeti GitHub App",
     content:
       "Install app on the repos you want — install for all or pick specific ones. That’s it! A one-time setup, and you’re ready to let your work market itself.",
-    image: "/X_Photo-Features.png",
+    image: "/Tweeti_Feature-3.png",
     icon: <Sparkles className="w-6 h-6 text-primary" />,
   },
 ];
