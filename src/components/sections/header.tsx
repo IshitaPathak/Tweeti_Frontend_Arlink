@@ -65,6 +65,22 @@ export default function Header() {
     }
   }, [session]);
 
+  useEffect(() => {
+    if (localStorage.getItem("showXModal") === "true") {
+      setShowXModal(true);
+    }
+  }, []);
+
+  const openModal = () => {
+    setShowXModal(true);
+    localStorage.setItem("showXModal", "true");
+  };
+
+  const closeModal = () => {
+    setShowXModal(false);
+    localStorage.removeItem("showXModal");
+  };
+
   const handleSignIn = async () => {
     try {
       console.log("entered in the login with github");
@@ -81,7 +97,7 @@ export default function Header() {
 
   const handleConnectX = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    setShowXModal(true);
+    openModal();
   };
 
   const getXCredentials = async () => {
@@ -138,6 +154,10 @@ export default function Header() {
             setStatusMessage("❌ Token received but failed to save");
           } finally {
             setIsXLoading(false);
+          }
+
+          if (githubUsername && tokenData.access_token && tokenData.access_secret) {
+            closeModal();
           }
 
           window.removeEventListener("message", messageListener);
@@ -228,7 +248,7 @@ export default function Header() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
           <Card className="relative w-full max-w-lg">
             <button
-              onClick={() => setShowXModal(false)}
+              onClick={closeModal}
               className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl font-semibold"
               aria-label="Close"
             >
