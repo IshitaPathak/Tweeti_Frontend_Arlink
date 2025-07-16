@@ -45,8 +45,8 @@ export default function Header() {
 
     const params = new URLSearchParams(window.location.search);
     const username = params.get("username");
-
-    console.log("GitHub Username:", username);
+    
+    localStorage.setItem("username" ,username)
     if (username) {
       setGithubUsername(username);
     }

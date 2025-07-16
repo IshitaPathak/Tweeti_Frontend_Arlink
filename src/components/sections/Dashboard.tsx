@@ -24,7 +24,8 @@ import {
   Save,
 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import axios from "axios"
+import { useEffect, useState } from "react";
 
 interface Post {
   id: string;
@@ -163,6 +164,11 @@ export default function Dashboard() {
     },
   ]);
 
+  useEffect(() => {
+    console.log(toneSettings)
+  }, [setToneSettings])
+  
+
   const [stats] = useState<Stats>({
     streak: 47,
     users: 12500,
@@ -226,14 +232,22 @@ export default function Dashboard() {
     }
   };
 
-  const handleToneChange = (option: string, type: "tone" | "style") => {
-    setToneSettings((prev) => ({
-      ...prev,
-      [type]: prev[type].includes(option)
-        ? prev[type].filter((item) => item !== option)
-        : [...prev[type], option],
-    }));
+  const handleToneChange = async (option: string, type: "tone" | "style") => {
+    setToneSettings((prev) => {
+      const updated = {
+        ...prev,
+        [type]: prev[type].includes(option)
+          ? prev[type].filter((item) => item !== option)
+          : [...prev[type], option],
+      };
+  
+      return updated;
+    });
   };
+  
+const handleUpdateTone = async()=>{
+  await axios.post("http://localhost:3000/set_tone" , toneSettings)
+}
 
   const handleTabClick = (tabName: string) => {
     setActiveTab(tabName);
@@ -256,9 +270,12 @@ export default function Dashboard() {
   const saveToneSettings = () => {
     console.log("Saving tone settings:", toneSettings);
     setShowToneModal(false);
+    
+    savePostEdit()
   };
 
   const savePostEdit = () => {
+    console.log("sending data to database")
     if (editingPost) {
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
@@ -277,6 +294,21 @@ export default function Dashboard() {
       setEditPostContent("");
       setEditPostSchedule("");
     }
+
+    const github_username = localStorage.getItem("username");
+    console.log(github_username)
+      if (github_username) {
+        fetch("http://localhost:3000/set_tone", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            github_username,
+            toneSettings: toneSettings,
+          }),
+        }).catch((err) => console.error("Error sending tone settings:", err));
+      }
   };
 
   const closeEditModal = () => {
