@@ -134,7 +134,7 @@ export default function Header() {
 
           try {
             const res = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/api/save-x-credentials`,
+              `https://tweeti-backend.onrender.com/api/save-x-credentials`,
               {
                 method: "POST",
                 headers: {

@@ -17,7 +17,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async () => {
     try {
       // Redirect to backend auth endpoint
-      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/github`;
+      window.location.href = `https://tweeti-backend.onrender.com/api/auth/github`;
     } catch (error) {
       console.error('Authentication error:', error);
     }

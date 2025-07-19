@@ -9,7 +9,7 @@ export async function saveXCredentials({
   access_token: string;
   access_secret: string;
 }) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/save-x-credentials`, {
+  const response = await fetch(`https://tweeti-backend.onrender.com/api/save-x-credentials`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
