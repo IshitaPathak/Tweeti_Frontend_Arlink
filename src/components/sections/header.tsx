@@ -155,7 +155,7 @@ export default function Header() {
           } catch (err) {
             console.error("❌ Failed to save credentials:", err);
             setStatusType("error");
-            setStatusMessage("❌ Token received but failed to save");
+            setStatusMessage("❌ Token received but failed to save..");
           } finally {
             setIsXLoading(false);
           }
