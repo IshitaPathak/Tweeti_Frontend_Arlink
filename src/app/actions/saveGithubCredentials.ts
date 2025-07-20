@@ -10,7 +10,7 @@ export async function saveGithubCredentials({
   access_token: string;
   access_secret: string;
 }): Promise<{ userId: number }> {
-  const response = await fetch(`https://tweeti-backend.onrender.com/api/save-x-credentials`, {
+  const response = await fetch(`https://tweeti-backend.vercel.app/api/save-x-credentials`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

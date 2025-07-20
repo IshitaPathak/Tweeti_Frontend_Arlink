@@ -12,7 +12,7 @@ export default function useAuth() {
     
     if (code) {
       // Exchange code for session
-      fetch(`https://tweeti-backend.onrender.com/api/auth/github/callback?code=${code}`)
+      fetch(`https://tweeti-backend.vercel.app/api/auth/github/callback?code=${code}`)
         .then(res => res.json())
         .then(data => {
           console.log(data);
@@ -32,7 +32,7 @@ export default function useAuth() {
 
   const signIn = async () => {
     // Redirect to backend GitHub auth
-    window.location.href = `https://tweeti-backend.onrender.com/api/auth/github`;
+    window.location.href = `https://tweeti-backend.vercel.app/api/auth/github`;
   };
 
   const signOut = () => {

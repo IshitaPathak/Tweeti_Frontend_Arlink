@@ -104,7 +104,7 @@ export default function Header() {
     try {
       setIsXLoading(true);
       const popup = window.open(
-        `https://xauth-s7vs.onrender.com/auth/twitter`,
+        `https://x-auth-kiqo.vercel.app/auth/twitter`,
         "_blank",
         "width=500,height=600"
       );
@@ -134,7 +134,7 @@ export default function Header() {
 
           try {
             const res = await fetch(
-              `https://tweeti-backend.onrender.com/api/save-x-credentials`,
+              `https://tweeti-backend.vercel.app/api/save-x-credentials`,
               {
                 method: "POST",
                 headers: {
