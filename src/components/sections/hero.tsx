@@ -90,6 +90,24 @@ export function HeroCTA() {
         You ship code. We ships story.
       </motion.p>
 
+      {/* Dashboard Button above the cards */}
+      <motion.div
+        className="w-full flex justify-center pt-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          delay: 0.7, // adjust delay to match the flow of your hero section
+          duration: 0.8,
+          ease: [0.32, 0.72, 0, 1],
+        }}
+      >
+        <Link href="/dashboard">
+          <button className="bg-black text-white py-3 px-8 rounded-lg font-semibold text-lg shadow hover:bg-gray-900 transition">
+            Go to Dashboard
+          </button>
+        </Link>
+      </motion.div>
+
       <motion.div 
         className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mx-auto pt-8"
         initial={{ opacity: 0, y: 20 }}
