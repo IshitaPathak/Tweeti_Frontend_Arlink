@@ -146,7 +146,7 @@ export default function Dashboard() {
     const github_username = localStorage.getItem("username");
     if (github_username && editingPost.id === "generated") {
       fetch(`${API_BASE_URL}/update_generated_msg/${github_username}`, {
-        method: "POST",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ generated_msg: editPostContent }),
       }).catch((err) => console.error("Error updating generated message:", err));
