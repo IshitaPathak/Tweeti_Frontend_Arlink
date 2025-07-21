@@ -4,9 +4,12 @@ import {
   BarChart3,
   Settings,
   Wallet,
+  X,
+  Save,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { connectWallet } from "@/lib/arutils";
+import ToneSettingsModal from "../tone-modal";
 
 interface Post {
   id: string;
@@ -25,8 +28,8 @@ interface Stats {
 }
 
 interface ToneSettings {
-  style: string[];
-  tone: string[];
+  style: string;
+  tone: string;
   audience: string;
   formality: string;
   length: string;
@@ -41,21 +44,18 @@ interface ToneSettings {
 }
 
 export default function Dashboard() {
+  const API_BASE_URL = "https://tweeti-mk3.vercel.app";
+
   const [activeTab, setActiveTab] = useState("Dashboard");
-  const [selectedPost, setSelectedPost] = useState<string | null>(null);
   const [newPostContent, setNewPostContent] = useState("");
   const [showToneModal, setShowToneModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [editPostContent, setEditPostContent] = useState("");
-  const [editPostSchedule, setEditPostSchedule] = useState("");
-  const [editPostStatus, setEditPostStatus] = useState<
-    "scheduled" | "published" | "draft"
-  >("scheduled");
 
   const [toneSettings, setToneSettings] = useState<ToneSettings>({
-    style: [],
-    tone: [],
+    style: "Minimal",
+    tone: "Neutral",
     audience: "General",
     formality: "Professional",
     length: "Medium",
@@ -69,33 +69,34 @@ export default function Dashboard() {
     hashtagStyle: "Minimal",
   });
 
-  const [posts, setPosts] = useState<Post[]>([
-    {
-      id: "1",
-      content: "Just shipped a new API endpoint! 🚀 Check out the docs",
-      scheduledFor: "Today 2:00 PM",
-      status: "scheduled",
-      engagement: 245,
-    },
-    {
-      id: "2",
-      content: "Behind the scenes: How we handle 1M+ requests/day",
-      scheduledFor: "Tomorrow 10:30 AM",
-      status: "scheduled",
-      engagement: 189,
-    },
-    {
-      id: "3",
-      content: "Developer community milestone: 10k developers! 🎉",
-      scheduledFor: "Yesterday 4:00 PM",
-      status: "published",
-      engagement: 1250,
-    },
-  ]);
+  const [posts, setPosts] = useState<Post[]>([]);
 
   useEffect(() => {
-    console.log(toneSettings);
-  }, [toneSettings]);
+    const github_username = localStorage.getItem("username");
+    if (!github_username) return;
+
+    const fetchGeneratedTweet = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/generated_tweet/${github_username}`);
+        if (!res.ok) throw new Error("Failed to fetch generated tweet");
+        const data = await res.json();
+        if (data?.generated_msg) {
+          const newPost: Post = {
+            id: "generated",
+            content: data.generated_msg,
+            scheduledFor: "Today 5:00 PM",
+            status: "scheduled",
+            engagement: 245,
+          };
+          setPosts([newPost]);
+        }
+      } catch (error) {
+        console.error("Error fetching generated tweet:", error);
+      }
+    };
+
+    fetchGeneratedTweet();
+  }, []);
 
   const [stats] = useState<Stats>({
     streak: 47,
@@ -120,43 +121,40 @@ export default function Dashboard() {
     if (post && post.status === "scheduled") {
       setEditingPost(post);
       setEditPostContent(post.content);
-      setEditPostSchedule(post.scheduledFor);
-      setEditPostStatus(post.status);
       setShowEditModal(true);
     }
   };
 
-  const savePostEdit = () => {
-    if (editingPost) {
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === editingPost.id
-            ? {
-                ...post,
-                content: editPostContent,
-                scheduledFor: editPostSchedule,
-                status: editPostStatus,
-              }
-            : post
-        )
-      );
-      setShowEditModal(false);
-      setEditingPost(null);
-      setEditPostContent("");
-      setEditPostSchedule("");
+  const handleDeletePost = (postId: string) => {
+    setPosts((prevPosts) => prevPosts.filter((p) => p.id !== postId));
+    const github_username = localStorage.getItem("username");
+    if (github_username && postId === "generated") {
+      fetch(`${API_BASE_URL}/delete_generated_msg/${github_username}`, {
+        method: "DELETE",
+      }).catch((err) => console.error("Error deleting generated message:", err));
     }
+  };
+
+  const savePostEdit = () => {
+    if (!editingPost) return;
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === editingPost.id ? { ...post, content: editPostContent } : post
+      )
+    );
 
     const github_username = localStorage.getItem("username");
-    if (github_username) {
-      fetch("http://localhost:3000/set_tone", {
+    if (github_username && editingPost.id === "generated") {
+      fetch(`${API_BASE_URL}/update_generated_msg/${github_username}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          github_username,
-          toneSettings: toneSettings,
-        }),
-      }).catch((err) => console.error("Error sending tone settings:", err));
+        body: JSON.stringify({ generated_msg: editPostContent }),
+      }).catch((err) => console.error("Error updating generated message:", err));
     }
+
+    setShowEditModal(false);
+    setEditingPost(null);
+    setEditPostContent("");
   };
 
   const saveToneSettings = () => {
@@ -167,7 +165,6 @@ export default function Dashboard() {
   return (
     <div className="h-screen w-full bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto flex flex-col h-full bg-white shadow-lg border border-gray-200 rounded-2xl overflow-hidden">
-
         <header className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
           <h1 className="text-lg font-semibold text-purple-600">Tweeti Dashboard</h1>
           <button
@@ -253,101 +250,90 @@ export default function Dashboard() {
 
             <section className="bg-white border border-gray-200 rounded-xl p-6">
               <h3 className="font-semibold text-black mb-4">Scheduled Posts</h3>
-              <div className="space-y-2">
+              <div className="space-y-4">
                 {posts
                   .filter((p) => p.status === "scheduled")
                   .map((post) => (
                     <div
                       key={post.id}
-                      onClick={() => handlePostClick(post.id)}
-                      className="p-3 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:border-purple-600"
+                      className="flex gap-4 border border-gray-200 rounded-xl p-4 bg-gray-50 hover:shadow-md transition"
                     >
-                      <p className="text-sm text-black">{post.content}</p>
-                      <p className="text-xs text-gray-700">{post.scheduledFor}</p>
+                      <div className="flex-shrink-0">
+                        <div className="w-10 h-10 bg-gray-300 rounded-full" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-gray-900">@{localStorage.getItem("username") || "username"}</span>
+                            <span className="text-xs text-gray-500">{post.scheduledFor}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => handlePostClick(post.id)}
+                              className="text-xs text-purple-600 hover:underline"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeletePost(post.id)}
+                              className="text-xs text-red-500 hover:underline"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                        <p className="mt-2 text-black text-sm leading-snug">{post.content}</p>
+                        <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+                          <div className="flex items-center gap-1">
+                            <svg width="16" height="16" fill="currentColor" className="text-pink-500">
+                              <path d="M8 14s6-4.3 6-7.5S11.5 2 8 5.3 2 6.5 2 9.5 8 14 8 14z" />
+                            </svg>
+                            {post.engagement || 0}
+                          </div>
+                          <span>Scheduled</span>
+                        </div>
+                      </div>
                     </div>
                   ))}
               </div>
             </section>
           </main>
         </div>
+      </div>
 
-        {showToneModal && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="w-[480px] bg-white rounded-2xl shadow-2xl p-6 max-h-[80vh] overflow-y-auto">
-              <h2 className="text-lg font-bold text-black mb-4">Tone & Style Settings</h2>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm text-gray-900 mb-1">Audience:</label>
-                  <select
-                    value={toneSettings.audience}
-                    onChange={(e) => setToneSettings((prev) => ({ ...prev, audience: e.target.value }))}
-                    className="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-black"
-                  >
-                    <option>General</option>
-                    <option>Developers</option>
-                    <option>Business</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-900 mb-1">Brand Voice:</label>
-                  <select
-                    value={toneSettings.brandVoice}
-                    onChange={(e) => setToneSettings((prev) => ({ ...prev, brandVoice: e.target.value }))}
-                    className="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-black"
-                  >
-                    <option>Authentic</option>
-                    <option>Innovative</option>
-                    <option>Trustworthy</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-900 mb-1">Emotional Tone:</label>
-                  <select
-                    value={toneSettings.emotionalTone}
-                    onChange={(e) => setToneSettings((prev) => ({ ...prev, emotionalTone: e.target.value }))}
-                    className="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-black"
-                  >
-                    <option>Neutral</option>
-                    <option>Excited</option>
-                    <option>Empathetic</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-900 mb-1">Formality:</label>
-                  <select
-                    value={toneSettings.formality}
-                    onChange={(e) => setToneSettings((prev) => ({ ...prev, formality: e.target.value }))}
-                    className="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-black"
-                  >
-                    <option>Casual</option>
-                    <option>Professional</option>
-                    <option>Formal</option>
-                  </select>
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                  <button
-                    onClick={() => setShowToneModal(false)}
-                    className="px-4 py-2 text-gray-900 rounded-lg hover:bg-gray-100"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={saveToneSettings}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
+      {showEditModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white text-black p-6 rounded-lg w-96">
+            <h3 className="text-lg font-semibold mb-4">Edit Post</h3>
+            <textarea
+              value={editPostContent}
+              onChange={(e) => setEditPostContent(e.target.value)}
+              className="w-full h-24 p-3 bg-gray-50 border border-gray-300 rounded-lg text-black focus:ring-2 focus:ring-purple-600 resize-none"
+            />
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="flex items-center gap-1 text-gray-600 hover:text-black"
+              >
+                <X className="w-4 h-4" /> Cancel
+              </button>
+              <button
+                onClick={savePostEdit}
+                className="flex items-center gap-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+              >
+                <Save className="w-4 h-4" /> Save
+              </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      <ToneSettingsModal
+        showToneModal={showToneModal}
+        setShowToneModal={setShowToneModal}
+        toneSettings={toneSettings}
+        setToneSettings={setToneSettings}
+      />
     </div>
   );
 }
