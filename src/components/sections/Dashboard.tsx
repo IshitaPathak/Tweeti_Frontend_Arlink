@@ -10,6 +10,7 @@ import {
 import { useState, useEffect } from "react";
 import { connectWallet } from "@/lib/arutils";
 import ToneSettingsModal from "../tone-modal";
+import Link from "next/link";
 
 interface Post {
   id: string;
@@ -153,11 +154,25 @@ export default function Dashboard() {
     }
 
     setShowEditModal(false);
-    setEditingPost(null);
+    setEditingPost(null); 
     setEditPostContent("");
   };
 
   const saveToneSettings = () => {
+    const github_username = localStorage.getItem("username");
+    console.log(github_username)
+    if (github_username) {
+      fetch(`http://${API_BASE_URL}/set_tone`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          github_username,
+          toneSettings: toneSettings,
+        }),
+      }).catch((err) => console.error("Error sending tone settings:", err));
+    }
     setShowToneModal(false);
     savePostEdit();
   };
@@ -167,14 +182,8 @@ export default function Dashboard() {
       <div className="max-w-6xl mx-auto flex flex-col h-full bg-white shadow-lg border border-gray-200 rounded-2xl overflow-hidden">
         <header className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
           <h1 className="text-lg font-semibold text-purple-600">Tweeti Dashboard</h1>
-          <button
-            onClick={connectWallet}
-            className="flex items-center gap-2 text-sm bg-gray-100 text-gray-900 px-4 py-2 rounded-xl hover:bg-gray-200"
-          >
-            <Wallet className="w-4 h-4 text-purple-500" /> Connect Wallet
-          </button>
         </header>
-
+  
         <div className="flex flex-1 overflow-hidden">
           <aside className="w-48 bg-white border-r border-gray-200 flex flex-col gap-2 p-4">
             {sidebarItems.map((item) => {
@@ -183,11 +192,10 @@ export default function Dashboard() {
                 <button
                   key={item.name}
                   onClick={() => handleTabClick(item.name)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
-                    activeTab === item.name
-                      ? "bg-purple-600 text-white"
-                      : "hover:bg-gray-100 text-gray-900"
-                  }`}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${activeTab === item.name
+                    ? "bg-purple-600 text-white"
+                    : "hover:bg-gray-100 text-gray-900"
+                    }`}
                 >
                   <Icon className="w-4 h-4" />
                   {item.name}
@@ -195,7 +203,7 @@ export default function Dashboard() {
               );
             })}
           </aside>
-
+  
           <main className="flex-1 p-6 space-y-6 overflow-y-auto">
             <section className="grid grid-cols-3 gap-4">
               <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl">
@@ -211,43 +219,53 @@ export default function Dashboard() {
                 <p className="text-xl font-bold text-black">{stats.totalPosts}</p>
               </div>
             </section>
-
-            <section className="bg-white border border-gray-200 rounded-xl p-6">
-              <h3 className="font-semibold text-black mb-4">New Post</h3>
-              <textarea
-                value={newPostContent}
-                onChange={(e) => setNewPostContent(e.target.value)}
-                placeholder="What's happening?"
-                className="w-full h-24 p-3 bg-gray-50 border border-gray-300 rounded-lg text-black focus:ring-2 focus:ring-purple-600 resize-none"
-              />
-              <div className="flex gap-2 mt-4">
-                <button
-                  onClick={() => {
-                    if (newPostContent.trim()) {
-                      const newPost: Post = {
-                        id: (posts.length + 1).toString(),
-                        content: newPostContent,
-                        scheduledFor: "Today 6:00 PM",
-                        status: "scheduled",
-                        engagement: 0,
-                      };
-                      setPosts([...posts, newPost]);
-                      setNewPostContent("");
-                    }
-                  }}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg"
-                >
-                  Schedule
-                </button>
-                <button
-                  onClick={() => setShowToneModal(true)}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 py-2 rounded-lg"
-                >
-                  Tone & Style
-                </button>
+  
+            <section>
+              <div className="flex flex-wrap gap-11 p-6 pr-5 bg-gray-50">
+                {/* Card 1 */}
+                <div className="relative bg-white rounded-2xl shadow-md p-6 w-full sm:w-[320px]">
+                  <div className="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-md mb-4">
+                    <span className="text-xl">➡️</span>
+                  </div>
+                  <span className="absolute top-4 right-4 text-xs font-semibold bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                    Requires X Credentials
+                  </span>
+                  <h3 className="text-lg font-semibold mb-1">GitHub Commit to Tweet</h3>
+                  <p className="text-sm text-gray-500 mb-4">Automatically tweet updates about your product</p>
+                  <button className="w-full text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-md py-2 transition">
+                    <Link
+                      href="https://github.com/apps/tweetiii"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Get Started Now
+                    </Link>
+                  </button>
+                </div>
+  
+                {/* Card 2 */}
+                <div className="relative bg-white rounded-2xl shadow-md p-6 w-full sm:w-[320px]">
+                  <div className="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-md mb-4">
+                    <span className="text-xl">📄</span>
+                  </div>
+                  <span className="absolute top-4 right-4 text-xs font-semibold bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                    Configure with github
+                  </span>
+                  <h3 className="text-lg font-semibold mb-1">GitHub Docify</h3>
+                  <p className="text-sm text-gray-500 mb-4">Keep your README updated</p>
+                  <button className="w-full text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-md py-2 transition">
+                    <Link
+                      href="https://github.com/apps/readmepusher"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Get Started Now
+                    </Link>
+                  </button>
+                </div>
               </div>
             </section>
-
+  
             <section className="bg-white border border-gray-200 rounded-xl p-6">
               <h3 className="font-semibold text-black mb-4">Scheduled Posts</h3>
               <div className="space-y-4">
@@ -300,7 +318,7 @@ export default function Dashboard() {
           </main>
         </div>
       </div>
-
+  
       {showEditModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white text-black p-6 rounded-lg w-96">
@@ -327,7 +345,7 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-
+  
       <ToneSettingsModal
         showToneModal={showToneModal}
         setShowToneModal={setShowToneModal}
@@ -336,4 +354,4 @@ export default function Dashboard() {
       />
     </div>
   );
-}
+};

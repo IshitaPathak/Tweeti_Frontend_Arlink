@@ -109,7 +109,22 @@ export default function ToneSettingsModal({
   toneSettings,
   setToneSettings,
 }: ToneSettingsModalProps) {
+  const API_BASE_URL = "https://tweeti-mk3.vercel.app";
   const saveToneSettings = () => {
+    const github_username = localStorage.getItem("username");
+    console.log(github_username)
+    if (github_username) {
+      fetch(`http://${API_BASE_URL}/set_tone`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          github_username,
+          toneSettings: toneSettings,
+        }),
+      }).catch((err) => console.error("Error sending tone settings:", err));
+    }
     console.log("Saved Tone Settings:", toneSettings);
     setShowToneModal(false);
   };
