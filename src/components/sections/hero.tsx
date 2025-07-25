@@ -87,7 +87,7 @@ export function HeroCTA() {
           ease,
         }}
       >
-        You ship code. We ships story.
+        You ship code. We ships stories.
       </motion.p>
 
       {/* Dashboard Button above the cards */}

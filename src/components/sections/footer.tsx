@@ -3,65 +3,34 @@ import { siteConfig } from "@/lib/config";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { FaDiscord, FaLinkedin } from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <footer>
-      <div className="max-w-6xl mx-auto py-16 sm:px-10 px-5 pb-0">
-        <a
-          href="/"
-          title={siteConfig.name}
-          className="relative mr-6 flex items-center space-x-2"
-        >
-          <Image
-            src="/Tweeti_Logo.png"
-            alt="Tweeti Logo"
-            width={80}
-            height={80}
-          />
-        </a>
-
-        <div className="grid md:grid-cols-3 lg:grid-cols-4 sm:grid-cols-2 mt-8">
-          {siteConfig.footer.map((section, index) => (
-            <div key={index} className="mb-5">
-              <h2 className="font-semibold">{section.title}</h2>
-              <ul>
-                {section.links.map((link, linkIndex) => (
-                  <li key={linkIndex} className="my-2">
-                    <Link
-                      href={link.href}
-                      className="group inline-flex cursor-pointer items-center justify-start gap-1 text-muted-foreground duration-200 hover:text-foreground hover:opacity-90"
-                    >
-                      {link.icon && link.icon}
-                      {link.text}
-                      <ChevronRight className="h-4 w-4 translate-x-0 transform opacity-0 transition-all duration-300 ease-out group-hover:translate-x-1 group-hover:opacity-100" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+    <footer className="w-full py-20 px-6 sm:px-12 bg-white">
+      <div className="flex flex-col items-center justify-center">
+        <h2 className="mx-auto mt-4 max-w-xs text-3xl font-heading tracking-heading font-semibold sm:max-w-none sm:text-4xl md:text-5xl mb-12 text-center">
+          Follow us for latest updates!
+        </h2>
+        <div className="flex flex-row items-center justify-center gap-8 mt-6 mb-10 py-2">
+          <a href="https://x.com/usetweeti" target="_blank" rel="noopener noreferrer" aria-label="X" className="hover:scale-110 transition-transform">
+            <Icons.twitter className="w-9 h-9" />
+          </a>
+          <a href="https://github.com/Tweeti-org" target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="hover:scale-110 transition-transform">
+            <Icons.github className="w-10 h-10" />
+          </a>
+          <a href="https://discord.com" target="_blank" rel="noopener noreferrer" aria-label="Discord" className="hover:scale-110 transition-transform">
+            <FaDiscord className="w-10 h-10" />
+          </a>
+          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="hover:scale-110 transition-transform">
+            <FaLinkedin className="w-10 h-10" />
+          </a>
         </div>
-        <div className="max-w-6xl mx-auto border-t py-2 grid md:grid-cols-2 h-full justify-between w-full grid-cols-1 gap-1">
-          <span className="text-sm tracking-tight text-foreground">
-            Copyright © {new Date().getFullYear()}{" "}
-            <Link href="/" className="cursor-pointer">
-              {siteConfig.name}
-            </Link>{" "}
-            - {siteConfig.description}
-          </span>
-          <ul className="flex justify-start md:justify-end text-sm tracking-tight text-foreground">
-            <li className="mr-3 md:mx-4">
-              <Link href="#" target="_blank" rel="noopener noreferrer">
-                Privacy Policy
-              </Link>
-            </li>
-            <li className="mr-3 md:mx-4">
-              <Link href="#" target="_blank" rel="noopener noreferrer">
-                Terms of Service
-              </Link>
-            </li>
-          </ul>
+        <div className="flex flex-col items-center justify-center mt-6 mb-2">
+          <Image src="/Tweeti_Logo.png" alt="Tweeti Logo" width={56} height={56} />
+        </div>
+        <div className="mt-2 text-center text-sm text-muted-foreground font-serif">
+          © {new Date().getFullYear()} Tweeti. All rights reserved.
         </div>
       </div>
     </footer>
