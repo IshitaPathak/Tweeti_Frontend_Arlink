@@ -40,6 +40,15 @@ export default function NavigationMenuDemo() {
   return (
     <NavigationMenu>
       <NavigationMenuList>
+        {/* Dashboard link on the right side, before Features and Blog */}
+        <NavigationMenuItem>
+          <Link href="/dashboard" legacyBehavior passHref>
+            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              Dashboard
+            </NavigationMenuLink>
+          </Link>
+        </NavigationMenuItem>
+        {/* Render the rest of the menu as before */}
         {siteConfig.header.map((item, index) => (
           <NavigationMenuItem key={index}>
             {item.trigger ? (

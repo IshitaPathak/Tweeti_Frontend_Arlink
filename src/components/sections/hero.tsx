@@ -101,11 +101,15 @@ export function HeroCTA() {
           ease: [0.32, 0.72, 0, 1],
         }}
       >
-        <Link href="/dashboard">
+        <a
+          href="https://github.com/apps/tweetiii"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <button className="bg-black text-white py-3 px-8 rounded-lg font-semibold text-lg shadow hover:bg-gray-900 transition">
-            Go to Dashboard
+            Install tweeti app
           </button>
-        </Link>
+        </a>
       </motion.div>
 
       <motion.div 
@@ -115,7 +119,7 @@ export function HeroCTA() {
         transition={{ delay: 0.8, duration: 0.8, ease }}
       >
         {/* First Feature - Integration */}
-        <motion.div
+        {/* <motion.div
           className="group relative overflow-hidden rounded-xl border bg-gradient-to-br from-purple-50/50 to-purple-100/30 dark:from-purple-950/50 dark:to-purple-900/30 p-6 hover:shadow-lg transition-all duration-300 hover:scale-105"
           whileHover={{ y: -5 }}
         >
@@ -142,10 +146,10 @@ export function HeroCTA() {
           >
             Get Started Now
           </Link>
-        </motion.div>
+        </motion.div> */}
 
         {/* Second Feature - Direct Access */}
-        <motion.div
+        {/* <motion.div
           className="group relative overflow-hidden rounded-xl border bg-gradient-to-br from-purple-50/50 to-purple-100/30 dark:from-purple-950/50 dark:to-purple-900/30 p-6 hover:shadow-lg transition-all duration-300 hover:scale-105"
           whileHover={{ y: -5 }}
         >
@@ -172,7 +176,7 @@ export function HeroCTA() {
           >
             Get Started Now
           </Link>
-        </motion.div>
+        </motion.div> */}
       </motion.div>
     </div>
   );
