@@ -218,7 +218,7 @@ export default function Header() {
                   <Link
                     href=""
                     onClick={handleConnectX}
-                    className={buttonVariants({ variant: "outline" })}
+                    className={buttonVariants({ variant: "outline" }) + "border-3"}
                   >
                     Connect GitHub & X
                   </Link>
