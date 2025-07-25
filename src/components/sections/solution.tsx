@@ -30,7 +30,7 @@ export default function Component() {
 	return (
 		<Section
 			title="Solution"
-			subtitle="Empower Your Business with Tweeti"
+			subtitle="Empower Your Project with Tweeti"
 			description="Generic AI tools won't suffice. Our platform is purpose-built to provide exceptional AI-driven solutions for your unique business needs."
 			className="bg-neutral-100 dark:bg-neutral-900"
 		>

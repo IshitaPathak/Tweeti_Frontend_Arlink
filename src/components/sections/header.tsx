@@ -260,7 +260,7 @@ export default function Header() {
             </button>
 
             <CardHeader>
-              <CardTitle className="text-2xl font-heading ">
+              <CardTitle className="text-2xl font-heading tracking-wide ">
                 🔗 Connect GitHub & X
               </CardTitle>
               <p className="text-sm font-body tracking-body text-muted-foreground mt-1">
